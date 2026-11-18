@@ -66,9 +66,9 @@ Ubah `OPENROUTER_MODEL` di `.env` ke slug model apa pun dari https://openrouter.
 ### Deploy ke internet
 
 GitHub Pages hanya bisa menyajikan file statis, jadi ia **tidak bisa** menjalankan backend ini. Kalau widget-nya dibuka dari GitHub Pages, ia otomatis kembali ke jawaban keyword (tetap berfungsi, hanya bukan AI beneran). Supaya chat AI-nya hidup di internet, deploy repo ini ke hosting Node.js — server ini sudah menyajikan websitenya juga, jadi satu deploy cukup. `package.json` di root repo mendelegasikan install/build/start ke `server/`, jadi hosting buildpack bisa deploy langsung dari root.
-- **Koyeb (tanpa kartu kredit):** daftar pakai GitHub, buat web service dari repo ini (buildpack Node.js), isi `OPENROUTER_API_KEY` di environment variables, deploy. Instance gratis tidur setelah 1 jam tanpa pengunjung.
+- **Vercel (tanpa kartu kredit, cara yang dipakai sekarang):** import repo ini di vercel.com (Framework Preset "Other", biarkan build command kosong — file statis dilayani dari root repo), isi `OPENROUTER_API_KEY` dan `OPENROUTER_MODEL` di Environment Variables, deploy. Endpoint chat-nya adalah `api/chat.js` (Vercel Serverless Function, padanan `POST /api/chat` dari `server/`). `vercel.json` meminta `maxDuration` 60 detik; paket gratis Vercel kadang tetap membatasi fungsi di 10 detik — kalau model gratis merespons lambat, widget otomatis kembali ke jawaban keyword.
+- **Koyeb (tanpa kartu kredit):** daftar pakai GitHub, buat web service dari repo ini (buildpack Node.js), isi `OPENROUTER_API_KEY` di environment variables, deploy. Instance gratis tidur setelah 1 jam tanpa pengunjung. Catatan: pada 18–19 November 2026 panel kontrol Koyeb tidak menampilkan tombol buat service sama sekali (hanya banner "Koyeb is joining Mistral"), jadi deploy lewat Koyeb belum bisa.
 - **Render:** file `render.yaml` di repo ini sudah berisi konfigurasinya (New → Blueprint, isi `OPENROUTER_API_KEY`, deploy). Catatan: sejak akhir 2026 Render meminta kartu kredit untuk verifikasi identitas sebelum bisa membuat layanan apa pun, termasuk paket gratis.
-- **Vercel / Netlify:** memungkinkan, tapi butuh penyesuaian ke serverless function dan batas eksekusi 10 detik di paket gratis — berisiko timeout karena model gratis kadang merespons lambat.
 
 ## GitHub Pages
 
