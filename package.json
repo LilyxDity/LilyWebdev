@@ -1,0 +1,1 @@
+{"description":"Portfolio Adit (lilyxdity) — delegasi ke server/ agar hosting buildpack (Koyeb, Railway, dsb.) bisa deploy langsung dari root repo.","name":"lilywebdev","private":true,"scripts":{"build":"cd server && npm run build","install":"cd server && npm install","start":"cd server && npm start"}}
