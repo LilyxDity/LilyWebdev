@@ -267,9 +267,12 @@ const PROJECT_DATA = {
   });
 })();
 
-/* ---------- Widget AI Assistant (demo berbasis keyword, tanpa backend) ---------- */
-// ✏️ BISA DIUBAH: jawaban asisten AI. Tiap baris berisi kata kunci dan jawabannya.
-// Kata kunci ditulis huruf kecil; jawaban boleh diubah bebas.
+/* ---------- Widget AI Assistant (OpenRouter, dengan fallback keyword) ----------
+   Widget ini memanggil backend di /api/chat (server/ memakai OpenRouter).
+   Kalau backend tidak tersedia — misalnya di GitHub Pages yang hanya statis —
+   widget otomatis kembali ke jawaban keyword di bawah ini, jadi tetap berguna. */
+// ✏️ BISA DIUBAH: jawaban cadangan saat backend AI tidak tersedia.
+// Tiap baris berisi kata kunci dan jawabannya. Kata kunci ditulis huruf kecil.
 const AI_ANSWERS = [
   {
     keywords: ["dustfall", "game", "fps", "three.js", "threejs"],
@@ -349,21 +352,55 @@ const AI_DEFAULT_ANSWER =
     return match ? match.answer : AI_DEFAULT_ANSWER;
   }
 
-  form.addEventListener("submit", (event) => {
+  // Riwayat singkat untuk konteks (maksimal 3 pertukaran terakhir).
+  const history = [];
+
+  function setBusy(busy) {
+    input.disabled = busy;
+    form.querySelector("button[type='submit']").disabled = busy;
+  }
+
+  async function askAi(question) {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: question, history }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `Server menjawab ${response.status}`);
+    }
+    return data.reply;
+  }
+
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const question = input.value.trim();
     if (!question) return;
     addBubble(question, true);
     input.value = "";
+    setBusy(true);
 
-    // Indikator typing "…" sebelum jawaban muncul.
+    // Indikator typing "…" selama menunggu jawaban.
     const typing = addBubble("…", false);
     typing.classList.add("ai-bubble-typing");
 
-    // ✏️ BISA DIUBAH: jeda sebelum jawaban muncul (dalam milidetik). 900 = 0,9 detik.
-    setTimeout(() => {
+    try {
+      const reply = await askAi(question);
+      history.push({ role: "user", content: question });
+      history.push({ role: "assistant", content: reply });
+      while (history.length > 6) history.shift();
+      typing.remove();
+      addBubble(reply, false);
+    } catch (error) {
+      // Backend tidak tersedia / belum dikonfigurasi: pakai jawaban keyword
+      // supaya widget tetap berguna (misalnya di GitHub Pages).
+      console.warn("AI backend tidak tersedia, pakai jawaban keyword:", error);
       typing.remove();
       addBubble(findAnswer(question), false);
-    }, 900);
+    } finally {
+      setBusy(false);
+      input.focus();
+    }
   });
 })();

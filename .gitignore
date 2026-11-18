@@ -1,0 +1,8 @@
+# API key & rahasia — jangan pernah di-commit.
+.env
+.env.local
+
+# Dependencies & hasil build.
+node_modules/
+server/dist/
+server/node_modules/

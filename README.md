@@ -14,7 +14,7 @@ Dibuat oleh **Lucy** untuk **pangeran ucup** alias Adit (lilyxdity).
 - **My Tech Stack** — Frontend dan Web3 & Tools
 - **Selected Works** — DUSTFALL (game FPS Three.js), Flint Trading, DeFi Bug Bounty — detail lengkap di popup
 - **Contact** — form kontak (demo statis)
-- **Lucy Assistant** — widget chat AI demo di pojok kanan bawah, menjawab pertanyaan tentang Adit berdasarkan kata kunci
+- **Lucy Assistant** — widget chat AI di pojok kanan bawah. Dengan backend (`server/`) ia menjawab lewat model AI sungguhan (OpenRouter); tanpa backend, ia menjawab dari daftar kata kunci di `script.js`
 - **Animasi** — fade in saat elemen masuk layar dan fade out saat keluar, smooth scrolling, highlight menu aktif
 - **Responsif** — tampil rapi di HP, tablet, dan desktop
 
@@ -31,6 +31,41 @@ python3 -m http.server 8000
 ```
 
 lalu buka http://localhost:8000
+
+## Chat AI Beneran (OpenRouter)
+
+Widget chat memakai [OpenRouter](https://openrouter.ai) — satu API untuk ratusan model AI. API key **tidak pernah** ada di kode website; key hanya dipakai backend kecil di folder `server/` (TypeScript + SDK resmi `@openrouter/sdk`).
+
+### Menjalankan di komputer sendiri
+
+```bash
+# 1. Masuk ke folder server dan install dependencies
+cd server
+npm install
+
+# 2. Buat API key di https://openrouter.ai/keys, lalu:
+cp .env.example .env
+# buka .env dan isi OPENROUTER_API_KEY dengan key kamu
+
+# 3. Jalanin server (menyajikan website + API chat di satu port)
+npm run dev
+```
+
+Lalu buka http://localhost:3000 dan coba chat di widget pojok kanan bawah.
+
+### Ganti model
+
+Ubah `OPENROUTER_MODEL` di `.env` ke slug model apa pun dari https://openrouter.ai/models. Default-nya `inclusionai/ling-3.2-flash:free` — model gratis, jadi tidak perlu isi saldo untuk mencoba. Model gratis dibatasi OpenRouter (sekitar 50 request/hari untuk akun yang belum pernah isi saldo), dan kadang sibuk di sisi penyedianya — kalau satu model gratis sedang dibatasi, coba model gratis lain seperti `google/gemma-4-31b-it:free`. Kalau butuh lebih, isi saldo lalu ganti ke model berbayar, misalnya `anthropic/claude-opus-5.5` atau `deepseek/deepseek-chat`.
+
+### Keamanan
+
+- File `.env` sudah masuk `.gitignore` — jangan pernah di-commit atau dibagikan.
+- Backend membatasi 10 pesan per menit per pengunjung supaya kredit tidak cepat habis.
+- Cek status backend di http://localhost:3000/api/health.
+
+### Deploy ke internet
+
+GitHub Pages hanya bisa menyajikan file statis, jadi ia **tidak bisa** menjalankan backend ini. Kalau widget-nya dibuka dari GitHub Pages, ia otomatis kembali ke jawaban keyword (tetap berfungsi, hanya bukan AI beneran). Supaya chat AI-nya hidup di internet, deploy repo ini ke hosting Node.js — server ini sudah menyajikan websitenya juga, jadi satu deploy cukup. Cara termudah: Render — file `render.yaml` di repo ini sudah berisi konfigurasinya, jadi tinggal hubungkan repo di dashboard Render (New → Blueprint), isi `OPENROUTER_API_KEY`, dan deploy. Alternatif lain: Railway atau Vercel.
 
 ## GitHub Pages
 
@@ -60,6 +95,8 @@ Contoh yang bisa diubah: nama "Adit", daftar role efek typing, teks intro, link 
 | `index.html` | Struktur dan semua teks halaman |
 | `styles.css` | Semua gaya, warna (tema terang & gelap), dan layout responsif |
 | `script.js` | Loading screen, efek typing, dark mode, reveal saat scroll, modal proyek, form kontak, widget AI |
+| `server/` | Backend TypeScript (Express + `@openrouter/sdk`): endpoint `POST /api/chat`, menyajikan website statis |
+| `server/.env.example` | Contoh konfigurasi (`OPENROUTER_API_KEY`, `OPENROUTER_MODEL`, `PORT`) — salin ke `.env` |
 
 ## Lisensi
 

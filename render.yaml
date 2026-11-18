@@ -1,0 +1,23 @@
+# Render Blueprint — deploy LilyWebdev (situs + backend chat AI) dalam sekali klik.
+#
+# Cara pakai:
+#   1. Buka https://dashboard.render.com → New → Blueprint
+#   2. Hubungkan repo GitHub LilyxDity/LilyWebdev
+#   3. Saat diminta, isi OPENROUTER_API_KEY dengan key dari https://openrouter.ai/keys
+#      (key tidak pernah ditulis di repo ini — hanya di dashboard Render).
+#   4. Deploy. Render memberi URL publik, misalnya https://lilywebdev.onrender.com
+#
+# Catatan: paket free Render mematikan server setelah ~15 menit tanpa pengunjung;
+# kunjungan pertama setelah itu butuh ~50 detik untuk bangun lagi.
+services:
+  - type: web
+    name: lilywebdev
+    env: node
+    plan: free
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: inclusionai/ling-3.2-flash:free
